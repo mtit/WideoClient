@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="../css/mdui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/default.css" />
+		<script src="../js/mdui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/crypto-js.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/app.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<title>我的资料</title>
+		<style type="text/css">
+			* {
+				padding: 0;
+				margin: 0;
+			}
+
+			.mdui-msg-list {
+				list-style: none;
+				padding-bottom: 50px;
+			}
+
+			.mdui-msg-item {
+				display: flex;
+				list-style: none;
+			}
+
+			.left {
+				justify-content: flex-start;
+			}
+
+			.right {
+				justify-content: flex-end;
+			}
+
+			.mdui-msg-item-avatar {
+				margin-left: 10px;
+				margin-top: 12px;
+				margin-right: 10px;
+				width: 40px;
+				height: 40px;
+			}
+
+			.right .mdui-msg-item-content {
+				background-color: #9EEA6A;
+				color: #000000;
+				box-shadow: 0 0 0 0;
+			}
+
+			.mdui-msg-item-content {
+				font-size: 16px;
+				max-width: 70%;
+				width: auto;
+				display: inline-block !important;
+				display: inline;
+				-webkit-transition: -webkit-box-shadow .25s;
+				transition: -webkit-box-shadow .25s;
+				transition: box-shadow .25s;
+				transition: box-shadow .25s, -webkit-box-shadow .25s;
+				padding: 12px;
+				margin: .5rem 0 1rem 0;
+				border-radius: 2px;
+				background-color: #fff;
+				box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+			}
+			.mdui-msg-img{
+				max-width: 40%;
+				overflow: hidden;
+				
+			}
+			.mdui-msg-img img {
+				max-width: 100%;
+				max-height: 40vh;
+				object-fit: scale-down;
+			}
+
+			.mdui-msg-editor {
+				background-color: white;
+				height: 48px;
+				box-shadow: 0px 1px 1px 0;
+				position: fixed;
+				right: 0;
+				bottom: 0;
+				left: 0;
+			}
+		</style>
+	</head>
+	<body class="mdui-theme-primary-pink mdui-appbar-with-toolbar">
+		<div class="mdui-appbar mdui-appbar-fixed">
+			<div class="mdui-toolbar mdui-color-theme">
+				<a href="javascript:;" class="mdui-btn mdui-btn-icon" onclick="Close();">
+					<i class="mdui-icon material-icons">arrow_back</i>
+				</a>
+				<div class="mdui-typo-headline">私信</div>
+				<div class="mdui-toolbar-spacer"></div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<ul class="mdui-msg-list">
+			<li class="mdui-msg-item left">
+				<img class="mdui-img-rounded mdui-msg-item-avatar" src="https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=2187427604,2592491510&fm=26&gp=0.jpg">
+				<span class="mdui-msg-item-content">
+					我们都有一个家，名字叫中国，兄弟姐妹有很多，景色也不错！！！！
+				</span>
+			</li>
+			<li class="mdui-msg-item right">
+				<span class="mdui-msg-item-content">
+					我们都有一个家，名字叫中国，兄弟姐妹有很多，景色也不错！！！！
+				</span>
+				<img class="mdui-img-rounded mdui-msg-item-avatar" src="http://www.dcloud.io/hellomui/images/logo.png">
+			</li>
+			<li class="mdui-msg-item right">
+				<div class="mdui-msg-item-content mdui-msg-img">
+					<img class="" src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1336029781,3333225635&fm=27&gp=0.jpg">
+				</div>
+				<img class="mdui-img-rounded mdui-msg-item-avatar" src="http://www.dcloud.io/hellomui/images/logo.png">
+			</li>
+			<li class="mdui-msg-item right">
+				<div class="mdui-msg-item-content mdui-msg-img">
+					<img class="" src="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1454761787,1890833303&fm=27&gp=0.jpg">
+				</div>
+				<img class="mdui-img-rounded mdui-msg-item-avatar" src="http://www.dcloud.io/hellomui/images/logo.png">
+			</li>
+			
+			<li class="mdui-msg-item left">
+				<img class="mdui-img-rounded mdui-msg-item-avatar" src="http://www.dcloud.io/hellomui/images/logo.png">
+				<div class="mdui-msg-item-content mdui-msg-img">
+					<img class="" src="http://wx1.sinaimg.cn/orj360/48a0c197gy1g1su4qfmhnj20rs46lb2d.jpg">
+				</div>
+			</li>
+		</ul>
+		<div class="mdui-msg-editor">
+
+		</div>
+	</body>
+</html>

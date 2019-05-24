@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mdui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/crypto-js.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/app.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" type="text/css" href="../css/default.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/mdui.min.css" />
+	</head>
+	<body class="mdui-theme-primary-pink mdui-appbar-with-toolbar">
+		<div class="mdui-appbar mdui-appbar-fixed">
+			<div class="mdui-toolbar mdui-color-theme">
+				<a href="javascript:;" class="mdui-btn mdui-btn-icon" onclick="Close();">
+					<i class="mdui-icon material-icons">arrow_back</i>
+				</a>
+				<a href="javascript:;" class="mdui-typo-headline">用户登录</a>
+				<div class="mdui-toolbar-spacer"></div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="mdui-container">
+			<div class="mdui-textfield mdui-textfield-floating-label">
+				<label class="mdui-textfield-label">邮箱</label>
+				<input class="mdui-textfield-input" type="email" id="usermail" />
+			</div>
+			<div class="mdui-textfield mdui-textfield-floating-label">
+				<label class="mdui-textfield-label">密码</label>
+				<input class="mdui-textfield-input" type="password" id="password" />
+			</div>
+			<div class="mdui-row">
+				<div class="mdui-col-xs-6">
+					<div class="mdui-textfield mdui-textfield-floating-label">
+						<label class="mdui-textfield-label">验证码</label>
+						<input class="mdui-textfield-input" type="number" id="captcha" />
+					</div>
+				</div>
+				<div class="mdui-col-xs-6 mdui-valign">
+					<img width="100%" id="captchaimg">
+				</div>
+			</div>
+			<div class="clearfix">
+
+			</div>
+			<div class="mdui-row-xs-2">
+				<div class="mdui-col">
+					<button class="mdui-btn mdui-btn-block mdui-color-purple mdui-ripple" onclick="goReg();">前往注册</button>
+				</div>
+				<div class="mdui-col">
+					<button class="mdui-btn mdui-btn-block mdui-color-pink mdui-ripple" onclick="doLogin();">立即登录</button>
+				</div>
+			</div>
+		</div>
+
+		<script type="text/javascript" charset="utf-8">
+			var img = document.getElementById('captchaimg');
+			img.src = SERVER_URL+"Captcha";
+			img.onclick = function(){
+				img.style.display = "none";
+				img.src = SERVER_URL + "Captcha?" + Math.random();
+				img.onload = function(){
+					img.style.display = "block";
+				}
+			}
+			mui.init();
+		</script>
+	</body>
+</html>

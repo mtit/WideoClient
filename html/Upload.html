@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="../css/mdui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/default.css" />
+		<script src="../js/mdui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/crypto-js.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/app.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<title>VideoShare</title>
+	</head>
+	<body class="mdui-theme-primary-pink mdui-appbar-with-toolbar">
+		<div class="mdui-appbar mdui-appbar-fixed">
+			<div class="mdui-toolbar mdui-color-theme">
+				<a href="javascript:;" class="mdui-btn mdui-btn-icon" onclick="Close();">
+					<i class="mdui-icon material-icons">arrow_back</i>
+				</a>
+				<a href="javascript:;" class="mdui-typo-headline">VideoShare</a>
+				<div class="mdui-toolbar-spacer"></div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="mdui-container">
+			<video id="preview" autoplay="autoplay" width="100%" loop="loop"></video>
+			<div class="clearfix"></div>
+			<div class="mdui-textfield mdui-textfield-floating-label">
+				<label class="mdui-textfield-label">视频标题</label>
+				<input class="mdui-textfield-input" type="text" id="video_title" />
+			</div>
+			<div class="clearfix"></div>
+			<button class="mdui-btn mdui-btn-block mdui-color-pink mdui-ripple" onclick="upConfirm();">确认上传</button>
+			<div class="clearfix">
+
+			</div>
+			<canvas id="pic" width="480px" height="320px" style="display: none;">browser don't support canvas</canvas>
+		</div>
+		<script type="text/javascript">
+			var Video_Hash;
+			var xhr;
+			mui.plusReady(function() {
+				Video_Hash = plus.webview.currentWebview().Video_Hash;
+				console.log(Video_Hash);
+				document.getElementById('preview').src = IMAGE_URL + Video_Hash + ".mp4";
+			});
+			var upConfirm = function() {
+				//获取视频截图
+				var video_title = document.getElementById('video_title').value;
+				if (video_title == "") return;
+				var canvas = document.getElementById('pic');
+				var canvasCtx = canvas.getContext("2d");
+				var video = document.getElementById('preview');
+				console.log("高度:" + video.videoHeight);
+				console.log("宽度:" + video.videoWidth);
+				var height = video.videoHeight;
+				var width = video.videoWidth;
+				var imgheight = 0;
+				if (height > width * 0.75) {
+					imgheight = width * 0.75;
+				} else {
+					imgheight = height;
+				}
+				//坐原图像的x,y轴坐标，大小，目标图像的x，y轴标，大小。
+				canvasCtx.drawImage(video, 0, (height - imgheight) / 2, width, imgheight, 0, 0, 480, 320);
+				//把图标base64编码后变成一段url字符串
+				var dataUrl = canvas.toDataURL("image/png");
+				var imgFile = dataURLtoFile(dataUrl, Video_Hash + ".png");
+				var fd = new FormData();
+				fd.append('poster', imgFile);
+				fd.append('Video_Hash', Video_Hash);
+				fd.append('Video_Title', video_title);
+				xhr = new XMLHttpRequest();
+				xhr.open("post", SERVER_URL+'Upload/'+Video_Hash, true);
+				xhr.onload = uploadComplete;
+				xhr.send(fd);
+			}
+			function uploadComplete(evt){
+				var text = evt.target.responseText;
+				var data = JSON.parse(Decrypt(text));
+				if(data.code == 0){
+					mdui.alert('上传成功！',function(){
+						plus.webview.currentWebview().close();
+					});
+				}
+				if(data.code == -1){
+					mdui.alert('尚未登录，点击OK跳转登录后再上传即可！',function(){
+						mui.openWindow({
+							url:"Login.html",
+							id:"Login"
+						});
+					});
+					
+					return;
+				}else{
+					mdui.alert('上传失败！原因:'+data.msg);
+				}
+			}
+			var Close = function() {
+				mdui.confirm('视频尚未完成上传，是否确认放弃？',
+					function() {
+						plus.webview.currentWebview().close();
+					},
+					function() {
+						//
+					}
+				);
+			}
+
+			function dataURLtoFile(dataurl, filename) {
+				console.log("转文件")
+				var arr = dataurl.split(','),
+					mime = arr[0].match(/:(.*?);/)[1],
+					bstr = atob(arr[1]),
+					n = bstr.length,
+					u8arr = new Uint8Array(n);
+				while (n--) {
+					u8arr[n] = bstr.charCodeAt(n);
+				}
+				return new File([u8arr], filename, {
+					type: mime
+				});
+			}
+		</script>
+	</body>
+</html>

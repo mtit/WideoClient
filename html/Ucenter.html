@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="../css/mdui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/default.css" />
+		<script src="../js/mdui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/crypto-js.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/app.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<title>我的资料</title>
+	</head>
+	<body class="mdui-theme-primary-pink mdui-appbar-with-toolbar">
+		<div class="mdui-appbar mdui-appbar-fixed">
+			<div class="mdui-toolbar mdui-color-theme">
+				<a href="javascript:;" class="mdui-btn mdui-btn-icon" onclick="Close();">
+					<i class="mdui-icon material-icons">arrow_back</i>
+				</a>
+				<div class="mdui-typo-headline">个人中心</div>
+				<div class="mdui-toolbar-spacer"></div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="mdui-container">
+			<div class="mdui-card">
+				<div class="mdui-card-media" style="background: #E91E63;">
+					<div style="height: 11.25rem;"></div>
+					<div class="mdui-card-media-covered mdui-card-media-covered-gradient">
+						<div class="mdui-card-primary">
+							<div class="mdui-card-primary-title" id="username"></div>
+							<div class="mdui-card-primary-subtitle" id="userid"></div>
+							<div class="mdui-card-primary-subtitle" id="counts"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<ul class="mdui-list">
+
+				<li class="mdui-list-item mdui-ripple" onclick="List('MyVideo');">
+					<i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-teal">videocam</i>
+					<div class="mdui-list-item-content">我上传的</div>
+				</li>
+				<li class="mdui-list-item mdui-ripple" onclick="List('MyLikes');">
+					<i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-pink">favorite</i>
+					<div class="mdui-list-item-content">我喜欢的</div>
+				</li>
+				<div class="mdui-divider"></div>
+				<li class="mdui-list-item mdui-ripple" onclick="ChangePassword();">
+					<i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-red">book</i>
+					<div class="mdui-list-item-content">修改密码</div>
+				</li>
+				<li class="mdui-list-item mdui-ripple" onclick="FeedBack();">
+					<i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-brown">chat</i>
+					<div class="mdui-list-item-content">意见反馈</div>
+				</li>
+				<li class="mdui-list-item mdui-ripple" onclick="LoginOut();">
+					<i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-cyan-400">exit_to_app</i>
+					<div class="mdui-list-item-content">退出登录</div>
+				</li>
+			</ul>
+		</div>
+		<script type="text/javascript">
+			mui.init();
+			mui.get(SERVER_URL + "User/", function(data) {
+				var data = JSON.parse(Decrypt(data));
+				if (data.code == 1) {
+					mdui.alert(data.msg);
+					return;
+				}
+				if (data.code == -1) {
+					mdui.alert(data.msg, function() {
+						mui.openWindow({
+							url: "Login.html",
+							id: "Login"
+						});
+					});
+					return;
+				}
+				document.getElementById('username').innerText = data.info.User_Name;
+				document.getElementById('userid').innerText = "ID：" + data.info.User_ID;
+				document.getElementById('counts').innerText = data.info.Like_Count + "个喜欢  " + data.info.Comment_Count + "个评论";
+			});
+
+			function Close() {
+				mui.back();
+			}
+			var List = function(type) {
+				mui.openWindow({
+					url: "List.html",
+					id: "List-" + type,
+					extras: {
+						type: type
+					}
+				});
+			};
+			var ChangePassword = function() {
+				mdui.prompt('请输入新密码',
+					function(value) {
+						mdui.prompt('请再输入一次',
+							function(value2) {
+								if(value != value2){
+									mdui.alert('两次输入的密码不一致！');
+									return;
+								}
+								var password = CryptoJS.MD5(value).toString();
+								plus.nativeUI.showWaiting("登录中...");
+								mui.ajax(SERVER_URL + "User/Password", {
+									data: {
+										password: password
+									},
+									type: 'post', //HTTP请求类型
+									timeout: 10000, //超时时间设置为10秒；
+									success: function(data) {
+										plus.nativeUI.closeWaiting();
+										data = JSON.parse(Decrypt(data))
+										if (data.code == 1) {
+											mdui.alert("修改失败！");
+										} else {
+											mdui.alert("密码修改成功，请重新登录!",function(){
+												plus.webview.currentWebview().close();
+											});
+										}
+									},
+									error: function(xhr, type, errorThrown) {
+										plus.nativeUI.closeWaiting();
+										if (type == "timeout") {
+											mdui.alert('网络连接超时！');
+										} else {
+											mdui.alert('网络错误。类型:' + type);
+										}
+									}
+								});
+							}
+						);
+					}
+				);
+			};
+			var LoginOut = function(){
+				mui.ajax(SERVER_URL+'User/LoginOut',{
+					type:'get',//HTTP请求类型
+					timeout:10000,//超时时间设置为10秒；
+					success:function(data){
+						data = JSON.parse(Decrypt(data));
+						if(data.code == 0){
+							mui.toast('成功退出！');
+							plus.webview.currentWebview().close();
+						}else{
+							mui.toast('退出操作未能成功！');
+						}
+					},
+					error:function(xhr,type,errorThrown){
+						
+					}
+				});
+			};
+			var FeedBack = function(){
+				mui.toast('老子不想听你的反馈！！！！！！');
+			}
+		</script>
+	</body>
+</html>

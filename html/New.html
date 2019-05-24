@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="../css/default.css" />
+		<link rel="stylesheet" type="text/css" href="../css/mdui.min.css" />
+		<script src="../js/mdui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/crypto-js.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/app.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+		<div class="clearfix">
+			
+		</div>
+		<div class="mdui-container" id="container">
+
+		</div>
+		<div class="mdui-typo-caption-opacity mdui-text-center clearfix" id="pullinfo">
+
+		</div>
+		<script type="text/javascript">
+			mui.plusReady(function() {
+				console.log('Plus Ready!');
+				plus.webview.currentWebview().setStyle({
+					scrollIndicator: 'none'
+				});
+				mui.init({
+					pullRefresh: {
+						container: "#container", //下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+						down: {
+							style: 'circle', //必选，下拉刷新样式，目前支持原生5+ ‘circle’ 样式
+							color: '#2BD009', //可选，默认“#2BD009” 下拉刷新控件颜色
+							height: '50px', //可选,默认50px.下拉刷新控件的高度,
+							range: '100px', //可选 默认100px,控件可下拉拖拽的范围
+							offset: '0px', //可选 默认0px,下拉刷新控件的起始位置
+							auto: true, //可选,默认false.首次加载自动上拉刷新一次
+							callback: Refresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+						},
+						up: {
+							height: 50, //可选.默认50.触发上拉加载拖动距离
+							auto: false, //可选,默认false.自动上拉加载一次
+							callback: Loadmore //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+						}
+					}
+				});
+			});
+			var Refresh = function() {
+				mui.ajax(SERVER_URL + "New?refresh=refresh", {
+					type: 'get', //HTTP请求类型
+					timeout: 5000, //超时时间设置为10秒；
+					success: function(data) {
+						data = JSON.parse(Decrypt(data));
+						if (data.code == 1) {
+							mdui.alert(data.msg);
+							return;
+						}
+						var items = data.items;
+						var html = "";
+						for (var i = 0; i < items.length; i++) {
+							console.log(items[i].Video_Hash);
+							html += '<a onclick="Watch(\'' + items[i].Video_Hash + '\')">';
+							html += '<div class="mdui-card clearfix" >';
+							html += '<div class="mdui-card-media">';
+							html += '<img src="';
+							html += IMAGE_URL + items[i].Video_Hash + '.png" />';
+							html += '<div class="mdui-card-media-covered">';
+							html += '<div class="mdui-card-primary">';
+							html += '<div class="mdui-card-primary-title">' + items[i].Video_Title + '</div>';
+							html += '<div class="mdui-card-primary-subtitle">' + items[i].Video_Like + '人觉得很赞</div>';
+							html += '</div></div></div></div></a>';
+						}
+						document.getElementById('container').innerHTML = html;
+						mui('#container').pullRefresh().endPulldownToRefresh();
+						mui('#container').pullRefresh().enablePullupToRefresh();
+						document.getElementById('pullinfo').innerText = "上拉加载更多";
+					},
+					error: function(xhr, type, errorThrown) {
+						document.getElementById('container').innerHTML = "";
+						document.getElementById('pullinfo').innerText = "网络好像有点问题，请检查后重试！";
+						mui('#container').pullRefresh().endPulldown()();
+					}
+				});
+			}
+			
+			var Loadmore = function() {
+				document.getElementById('pullinfo').innerText = "正在获取更多内容...";
+				mui.ajax(SERVER_URL + 'New', {
+					type: 'get', //HTTP请求类型
+					timeout: 5000, //超时时间设置为10秒；
+					success: function(data) {
+						data = JSON.parse(Decrypt(data));
+						if (data.code == 1) {
+							mdui.alert(data.msg);
+							return;
+						}
+						var items = data.items;
+						if (items.length == 0) {
+							mui('#container').pullRefresh().endPullupToRefresh(true);
+							document.getElementById('pullinfo').innerText = "没有更多了";
+							return;
+						}
+						var html = "";
+						for (var i = 0; i < items.length; i++) {
+							console.log(items[i].Video_Hash);
+							html += '<a onclick="Watch(\'' + items[i].Video_Hash + '\')">';
+							html += '<div class="mdui-card clearfix" >';
+							html += '<div class="mdui-card-media">';
+							html += '<img src="';
+							html += IMAGE_URL + items[i].Video_Hash + '.png" />';
+							html += '<div class="mdui-card-media-covered">';
+							html += '<div class="mdui-card-primary">';
+							html += '<div class="mdui-card-primary-title">' + items[i].Video_Title + '</div>';
+							html += '<div class="mdui-card-primary-subtitle">' + items[i].Video_Like + '人觉得很赞</div>';
+							html += '</div></div></div></div></a>';
+						}
+						document.getElementById('container').insertAdjacentHTML('beforeend', html);
+						if (items.length < 5) {
+							document.getElementById('pullinfo').innerText = "没有更多了";
+							mui('#container').pullRefresh().endPullupToRefresh(true);
+						} else {
+							mui('#container').pullRefresh().endPullupToRefresh();
+							document.getElementById('pullinfo').innerText = "上拉加载更多";
+						}
+					},
+					error: function(xhr, type, errorThrown) {
+						document.getElementById('pullinfo').innerText = "网络好像有点问题，请检查后重试！";
+						mui('#container').pullRefresh().endPulldownToRefresh();
+					}
+				});
+			}
+			
+		</script>
+	</body>
+</html>

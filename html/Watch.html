@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="../css/mdui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/default.css" />
+		<script src="../js/mdui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/crypto-js.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/app.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<title>VideoShare</title>
+	</head>
+	<body class="mdui-theme-primary-pink mdui-appbar-with-toolbar">
+		<div class="mdui-appbar mdui-appbar-fixed">
+			<div class="mdui-toolbar mdui-color-theme">
+				<a href="javascript:;" class="mdui-btn mdui-btn-icon" onclick="Close();">
+					<i class="mdui-icon material-icons">arrow_back</i>
+				</a>
+				<div class="mdui-typo-headline">视频详情</div>
+				<div class="mdui-toolbar-spacer"></div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div class="mdui-container">
+			<div class="mdui-card">
+				<div class="mdui-card-media" id="container">
+				</div>
+				<div class="mdui-card-primary">
+					<div class="mdui-card-primary-title" id="video_title"></div>
+				</div>
+				<div class="mdui-card-actions" style="text-align: center;">
+					<button class="mdui-btn mdui-ripple" id="like_count"><i class="mdui-icon material-icons">favorite_border</i>喜欢</button>
+					<button class="mdui-btn mdui-ripple" onclick="Comment();"><i class="mdui-icon material-icons">chat_bubble_outline</i>评论</button>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+
+			<div class="mdui-typo" id="comment_count">
+
+			</div>
+			<div id="comment_list">
+
+			</div>
+		</div>
+		<script type="text/javascript">
+			var Video_Hash, Like_Count;
+			mui.plusReady(function() {
+				plus.webview.currentWebview().setStyle({
+					scrollIndicator: 'none'
+				});
+				Video_Hash = plus.webview.currentWebview().Video_Hash;
+				var html = '<video class="mdui-video-fluid" ';
+				html += 'src="' + IMAGE_URL + Video_Hash + ".mp4" + '" ';
+				html += 'poster="' + IMAGE_URL + Video_Hash + ".png" + '" ';
+				html += 'width="100%" autoplay="autoplay" controls="controls" controlslist="nodownload"></video>';
+				document.getElementById('container').insertAdjacentHTML("beforeend", html);
+				getInfo(Video_Hash);
+				getComment(Video_Hash);
+				mui.init({
+					swipeback: true
+				});
+			});
+
+			function Close() {
+				mui.back();
+			}
+
+			function getInfo(video_hash) {
+				mui.ajax(SERVER_URL, {
+					data: {
+						Video_Hash: video_hash
+					},
+					type: 'GET',
+					timeout: 10000,
+					success: function(data) {
+						console.log(Decrypt(data));
+						data = JSON.parse(Decrypt(data));
+						if (data.code == 1) {
+							mdui.alert(data.msg);
+							return;
+						}
+						var info = data.info;
+						document.getElementById('video_title').innerText = info.Video_Title;
+						Like_Count = info.Video_Like;
+						if (info.Liked != 0) {
+							document.getElementById('like_count').innerHTML =
+								'<i class="mdui-icon material-icons mdui-text-color-red">favorite</i>' + info.Video_Like + '人喜欢';
+						} else {
+							document.getElementById('like_count').innerHTML = '<i class="mdui-icon material-icons">favorite_border</i>' +
+								info.Video_Like + '人喜欢';
+						}
+
+					},
+					error: function(xhr, type, errorThrown) {}
+				})
+			}
+
+			function getComment(video_hash) {
+				mui.ajax(SERVER_URL + "Comment", {
+					data: {
+						Video_Hash: video_hash
+					},
+					type: 'GET',
+					timeout: 10000,
+					success: function(data) {
+						data = JSON.parse(Decrypt(data));
+						if (data.code == 1) {
+							mdui.alert(data.msg);
+							return;
+						}
+						var Comments = data.info;
+						document.getElementById('comment_count').innerHTML = '<strong><kbd>' + Comments.length + '</kbd> 条评论</strong>';
+						var html = "";
+						for (var i = 0; i < Comments.length; i++) {
+							html += '<div class="mdui-divider-inset"></div>';
+							html += '<div class="mdui-typo"><blockquote><footer>#';
+							html += i + 1 + '</footer><p>';
+							html += Comments[i].Comment_Content;
+							html += '</p><footer>' + Comments[i].User_Name + ' @ ' + Comments[i].Comment_Time +
+								'</footer></blockquote></div>';
+						}
+						document.getElementById('comment_list').innerHTML = html;
+					},
+					error: function(xhr, type, errorThrown) {
+						var html = '<div class="mdui-typo-caption-opacity mdui-text-center clearfix" onclick="getComment(\'' +
+							video_hash + '\')">获取评论列表失败</div>';
+						document.getElementById('comment_list').innerHTML = html;
+					}
+				});
+			}
+
+			function Comment() {
+				mdui.prompt('请输入评论内容',
+					function(value) {
+						if (value.match(/^[ ]*$/)) {
+							return;
+						}
+						mui.ajax(SERVER_URL + "Comment", {
+							data: {
+								Video_Hash: Video_Hash,
+								Comment_Content: value
+							},
+							type: 'POST',
+							timeout: 10000,
+							success: function(data) {
+								data = JSON.parse(Decrypt(data));
+								if (data.code == 1) {
+									mui.toast(data.msg);
+								} else {
+									mui.toast('评论发表成功！');
+									getComment(Video_Hash);
+								}
+							},
+							error: function(xhr, type, errorThrown) {
+								mui.toast(type);
+							},
+						});
+					},
+					function(value) {
+						//doNothing;
+					}
+				);
+			}
+			document.getElementById('like_count').onclick = function() {
+				mui.ajax(SERVER_URL + "Like", {
+					data: {
+						Video_Hash: Video_Hash,
+					},
+					type: 'GET',
+					timeout: 10000,
+					success: function(data) {
+						data = JSON.parse(Decrypt(data));
+						if (data.code == 1) {
+							Like_Count++;
+							document.getElementById('like_count').innerHTML = '<i class="mdui-icon material-icons mdui-text-color-red">favorite</i>' + Like_Count + '人喜欢';
+							return;
+						} 
+						if(data.code == 0){
+							mui.toast('网络错误');
+							return;
+						}
+						if (data.code == -1) {
+							Like_Count--;
+							document.getElementById('like_count').innerHTML = '<i class="mdui-icon material-icons">favorite_border</i>' + Like_Count + '人喜欢';
+							return;
+						}
+						if(data.code == 2){
+							mui.toast('请先登录');
+							return;
+						}
+					},
+					error: function(xhr, type, errorThrown) {
+						mdui.toast(type);
+					},
+				});
+			}
+		</script>
+	</body>
+</html>
