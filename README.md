@@ -9,9 +9,9 @@
 ##界面截图
 ![热门](assets/1.jpg)
 ![最新](assets/2.jpg)
-![登录](assets/3.jpg)
-![注册](assets/4.jpg)
-![个人](assets/5.jpg)
+![登录](assets/3.png)
+![注册](assets/4.png)
+![个人](assets/5.png)
 ![上传](assets/6.jpg)
 
 ##求个工作/(ㄒoㄒ)/~~
